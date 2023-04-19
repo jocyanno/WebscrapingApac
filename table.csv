@@ -1,7 +1,7 @@
 
-,"ter., 18/04","qua., 19/04","qui., 20/04","sex., 21/04","sáb., 22/04",,CATEGORIAS
-Mata Norte,Fraca,Fraca,Sem chuva,Fraca,Fraca,,Sem chuva
-Metropolitana,Fraca,Fraca,Sem chuva,Fraca,Fraca,,Fraca
-Mata Sul,Fraca,Fraca,Sem chuva,Fraca,Fraca,,Fraca a moderada
-Agreste,Fraca a moderada,Sem chuva,Sem chuva,Sem chuva,Sem chuva,,Moderada
-Sertão de Pernambuco,Fraca a moderada,Sem chuva,Sem chuva,Sem chuva,Sem chuva,,Moderada a forte
+,"qui., 20/04","sex., 21/04","sáb., 22/04","dom., 23/04","seg., 24/04",CATEGORIAS,Valores médios (24h),
+Mata Norte,Fraca,Fraca,Fraca,Fraca,Fraca,Sem chuva,<2 mm,
+Metropolitana,Fraca,Fraca,Fraca,Fraca,Fraca,Fraca,2 a 10,
+Mata Sul,Fraca,Fraca,Fraca,Fraca,Fraca,Fraca a moderada,10 a 30,
+Agreste,Fraca,Sem chuva,Sem chuva,Sem chuva,Sem chuva,Moderada,30 a 50,
+Sertão de Pernambuco,Fraca,Sem chuva,Sem chuva,Sem chuva,Sem chuva,Moderada a forte,50 a 100,

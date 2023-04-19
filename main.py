@@ -1,5 +1,4 @@
 import csv
-from sys import displayhook
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -8,17 +7,19 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+# Step 1: Install the necessary libraries
+
 # Step 2: Send a GET request to the page URL
-page_url = "https://sites.google.com/view/tendenciadeprecipitacao/paginainicial"
+page_url = 'https://sites.google.com/view/tendenciadeprecipitacao/paginainicial'
 response = requests.get(page_url)
 # print(response)
 
 # Step 3: Parse the HTML content and locate the first iframe element
-soup = BeautifulSoup(response.content, "html.parser")
-outer_iframe = soup.find("iframe")
+soup = BeautifulSoup(response.content, 'html.parser')
+outer_iframe = soup.find('iframe')
 
 ## get parent element from outer_iframe
-data_url = outer_iframe.find_parent("div", {"data-url": True})["data-url"]
+data_url = outer_iframe.find_parent('div', {'data-url': True})['data-url']
 
 print(data_url)
 
@@ -29,25 +30,25 @@ driver = webdriver.Chrome(options=options)
 driver.get(data_url)
 
 # Step 5: Find the table element
-table = driver.find_element(By.TAG_NAME, "table")
+table = driver.find_element(By.TAG_NAME, 'table')
 print(table)
-rows = table.find_elements(By.TAG_NAME, "tr")
+rows = table.find_elements(By.TAG_NAME, 'tr')
 
 ## Step 6: Insert the retrieved data inside a csv file
-with open("table.csv", "w", newline="") as csvFile:
-    writer = csv.writer(
-        csvFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
-    )
+with open('table.csv', 'w', newline='') as csvFile:
+    writer = csv.writer(csvFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     for i, row in enumerate(rows):
         if i > 6:
             break
-        cols = row.find_elements(By.TAG_NAME, "td")
+        cols = row.find_elements(By.TAG_NAME, 'td')
         row_data = []
         for j, col in enumerate(cols):
-            if j > 7:
+            if j == 6:
+                continue
+            if j > 9:
                 break
             row_data.append(col.text.strip())
-        print("\t".join(row_data))
+        print('\t'.join(row_data))
         writer.writerow(row_data)
 
 ## Step 7: Close the browser
@@ -75,25 +76,42 @@ with open("table.csv", newline="") as csvfile:
     for i, row in enumerate(reader):
         if i == 1:
             data = row[1:6]
-        elif i == 2:
-            matanorte = row[1:6]
         elif i == 3:
             metropolitana = row[1:6]
-        elif i == 4:
-            matasul = row[1:6]
-        elif i == 5:
-            agreste = row[1:6]
-        elif i == 6:
-            sertao = row[1:6]
 
-# Cria as tuplas com os valores de cada região
-for i in range(5):
-    tupla = (data[i], matanorte[i], metropolitana[i], matasul[i], agreste[i], sertao[i])
-    dados.append(tupla)
+    # Loop para enviar cada valor da metropolitana separadamente
+    for i, valor in enumerate(metropolitana):
+        # Pega os valores min e max para o valor atual
+        min_value = 0
+        max_value = 0
+        if valor == "Sem chuva":
+            min_value = 0
+            max_value = 2
+        elif valor == "Fraca":
+            min_value = 2
+            max_value = 10
+        elif valor == "Fraca a moderada":
+            min_value = 10
+            max_value = 30
+        elif valor == "Moderada":
+            min_value = 30
+            max_value = 50
+        elif valor == "Moderada a forte":
+            min_value = 50
+            max_value = 100
+        elif valor == "Forte":
+            min_value = 101
+            max_value = 200
+
+        # Cria a tupla com os valores da metropolitana
+        tupla = (data[i], metropolitana[i], min_value, max_value)
+
+        # Adiciona a tupla à lista de dados
+        dados.append(tupla)
 
 # SQL para inserir os valores na tabela
-sql = "INSERT INTO novodados (data, matanorte, metropolitana, matasul, agreste, sertao) VALUES (%s, %s, %s, %s, %s, %s)"
-print("dados inseridos")
+sql = "INSERT INTO novodados (data, metropolitana, min, max) VALUES (%s, %s, %s, %s)"
+
 # Executa o insert para todos os valores
 cursor.executemany(sql, dados)
 
@@ -102,3 +120,4 @@ mydb.commit()
 
 # Fecha a conexão com o banco de dados
 mydb.close()
+
