@@ -1,46 +1,44 @@
 import csv
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 # Step 1: Install the necessary libraries
+# pip install csv
+# pip install requests
+# pip install BeautifulSoup4
 
 # Step 2: Send a GET request to the page URL
-page_url = 'https://sites.google.com/view/tendenciadeprecipitacao/paginainicial'
+page_url = "https://sites.google.com/view/tendenciadeprecipitacao/paginainicial"
 response = requests.get(page_url)
 # print(response)
 
 # Step 3: Parse the HTML content and locate the first iframe element
-soup = BeautifulSoup(response.content, 'html.parser')
-outer_iframe = soup.find('iframe')
+soup = BeautifulSoup(response.content, "html.parser")
+outer_iframe = soup.find("iframe")
 
 ## get parent element from outer_iframe
-data_url = outer_iframe.find_parent('div', {'data-url': True})['data-url']
+data_url = outer_iframe.find_parent("div", {"data-url": True})["data-url"]
 
 print(data_url)
 
-# # Step 4: Interact with the inner iframe using Selenium
-options = Options()
-options.headless = True
-driver = webdriver.Chrome(options=options)
-driver.get(data_url)
+# Step 4: Send a GET request to the inner iframe URL
+response = requests.get(data_url)
 
-# Step 5: Find the table element
-table = driver.find_element(By.TAG_NAME, 'table')
+# Step 5: Parse the HTML content and find the table element
+soup = BeautifulSoup(response.content, "html.parser")
+table = soup.find("table")
 print(table)
-rows = table.find_elements(By.TAG_NAME, 'tr')
 
-## Step 6: Insert the retrieved data inside a csv file
-with open('table.csv', 'w', newline='') as csvFile:
-    writer = csv.writer(csvFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+# Step 6: Extract the table data and insert it into a CSV file
+rows = table.find_all("tr")
+with open("table.csv", "w", newline="") as csvFile:
+    writer = csv.writer(
+        csvFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+    )
     for i, row in enumerate(rows):
         if i > 6:
             break
-        cols = row.find_elements(By.TAG_NAME, 'td')
+        cols = row.find_all("td")
         row_data = []
         for j, col in enumerate(cols):
             if j == 6:
@@ -48,18 +46,13 @@ with open('table.csv', 'w', newline='') as csvFile:
             if j > 9:
                 break
             row_data.append(col.text.strip())
-        print('\t'.join(row_data))
+        print("\t".join(row_data))
         writer.writerow(row_data)
 
-## Step 7: Close the browser
-driver.quit()
-
-###############################################################################################
-
-import csv
+## Step 7: Insert the retrieved data into the database
+# Configuração de conexão com o banco de dados MariaDB
 import mysql.connector
 
-# Configuração de conexão com o banco de dados MariaDB
 mydb = mysql.connector.connect(
     host="localhost", user="root", password="", database="APAC"
 )
@@ -110,7 +103,7 @@ with open("table.csv", newline="") as csvfile:
         dados.append(tupla)
 
 # SQL para inserir os valores na tabela
-sql = "INSERT INTO novodados (data, metropolitana, min, max) VALUES (%s, %s, %s, %s)"
+sql = "INSERT INTO tendencia (data, metropolitana, min, max) VALUES (%s, %s, %s, %s)"
 
 # Executa o insert para todos os valores
 cursor.executemany(sql, dados)
@@ -120,4 +113,3 @@ mydb.commit()
 
 # Fecha a conexão com o banco de dados
 mydb.close()
-
