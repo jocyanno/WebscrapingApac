@@ -6,6 +6,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import datetime
+
+# Mapeamento dos nomes dos meses para números
+meses = {
+    'jan': 1, 'fev': 2, 'mar': 3, 'abr': 4,
+    'mai': 5, 'jun': 6, 'jul': 7, 'ago': 8,
+    'set': 9, 'out': 10, 'nov': 11, 'dez': 12
+}
 
 # Step 1: Install the necessary libraries
 
@@ -75,7 +83,19 @@ with open("table.csv", newline="") as csvfile:
 
     for i, row in enumerate(reader):
         if i == 1:
-            data = row[1:6]
+            entrada = row[1:6]
+            # Extrai o dia e o mês da entrada
+            dia, mes_str = entrada.split()[1].split('/')
+
+            # Remove o zero à esquerda do mês, se houver
+            mes_str1 = mes_str.lstrip('0')
+            mes =int(mes_str1)
+
+            # Obtém o ano atual
+            ano = datetime.datetime.now().year
+
+            # Cria um objeto datetime com a data
+            data = datetime.datetime(ano, mes, int(dia))
         elif i == 3:
             metropolitana = row[1:6]
 
